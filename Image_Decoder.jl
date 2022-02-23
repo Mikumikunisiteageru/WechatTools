@@ -4,10 +4,6 @@
 using PyCall
 OS = pyimport("os") # stat, utime
 
-os_id = "_os_id_"
-wx_id = "_wx_id_"
-path = "C:/Users/$os_id/Documents/WeChat Files/$wx_id/FileStorage/Image"
-
 mask(key::UInt8, stream::Vector{UInt8}) = xor.(key, stream)
 
 get_heads(path::AbstractString) = 
@@ -21,7 +17,7 @@ function get_key(path::AbstractString)
 	first(keyz)
 end
 
-function decode!(key::UInt8, path::AbstractString)
+function decode!(path::AbstractString, key::UInt8)
 	suffixes = Dict(0xff=>".jpg", 0x89=>".png")
 	println(path)
 	for file = readdir(path, join=true)
@@ -38,13 +34,17 @@ function decode!(key::UInt8, path::AbstractString)
 	println()
 end
 
-function decode_all!(path::AbstractString)
-	regex = r"\d{4}-\d\d$"
-	key = nothing
+function decode_all!(path::AbstractString, key=nothing)
 	for folder = readdir(path, join=true)
-		isnothing(match(regex, folder)) && continue
+		isnothing(match(r"\d{4}-\d\d$", folder)) && continue
 		isnothing(key) && (key = get_key(folder))
-		decode!(key, folder)
+		decode!(folder, key)
 	end
 	key
 end
+
+os_id = "_os_id_"
+wx_id = "_wx_id_"
+path = "C:/Users/$os_id/Documents/WeChat Files/$wx_id/FileStorage/Image"
+
+# decode_all!(path)
